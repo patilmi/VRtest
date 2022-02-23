@@ -21,7 +21,8 @@ public class RotatingBalls : MonoBehaviour
 
     void Start()
     {
-        height = 3;
+        
+        
         alpha = 3;
         beta = 2;
         gamma = 7;
@@ -39,11 +40,11 @@ public class RotatingBalls : MonoBehaviour
 
         sphereRenderer.material.SetColor("_Color", Color.red);
         
-        for (int y=-3; y <= height; y+=3)
+        for (int y=-3; y <= 3; y+=3)
         {
-           for (int x=-3; x <= height; x+=3)
+           for (int x=-3; x <= 3; x+=3)
            {
-                for (int z = -3; z <= height; z+=3)
+                for (int z = -3; z <= 3; z+=3)
                 {
                     ballList.Add(Instantiate(sphere, new Vector3(x, y, z), Quaternion.identity));
                 }
@@ -58,7 +59,7 @@ public class RotatingBalls : MonoBehaviour
     void Update()  
     {
         float x, y, z;
-        float speed = 0.0001f;
+        float speed = 0.0005f;
         float factor = Time.deltaTime * speed;
         for (int i = 0; i < ballList.Count; i++)
 

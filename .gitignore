@@ -3,3 +3,7 @@ Temp/
 Assets/ExampleAssets/
 Logs/
 *.meta
+obj/Debug/
+*.sln
+*.csproj
+.vs/VRtest/v17/.suo
