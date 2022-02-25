@@ -12,7 +12,7 @@ public class FourDim : MonoBehaviour
     float edge1 = -0.3f;
     float edge2 = 0.3f;
     float inc = 0.3f;
-    //float fourDR = 0.1f;
+    float fourDR = 0.1f;
 
 
     float alpha, beta, gamma, delta, epsilon, nu;
@@ -34,7 +34,7 @@ public class FourDim : MonoBehaviour
         return sum;
     }
 
-    List<float> VectorAdd(List<float> left, List<float> right)
+    List<float> VectorsSummed(List<float> left, List<float> right)
     {
         if (left.Count != right.Count)
         {
@@ -50,7 +50,7 @@ public class FourDim : MonoBehaviour
     }
 
 
-    List<float> VectorSubtract(List<float> left, List<float> right)
+    List<float> VectorsSubtracted(List<float> left, List<float> right)
     {
         if (left.Count != right.Count)
         {
@@ -65,45 +65,46 @@ public class FourDim : MonoBehaviour
         return result;
     }
 
-    List<float> VectorScale(float scale, List<float> toScale)
+    List<float> VectorScaled(float scale, List<float> toScale)
     {
+        List<float> scaled = new List<float>(toScale);
         for (int i = 0; i < toScale.Count; i++)
         {
-            toScale[i] *= scale;
+            scaled[i] *= scale;
         }
 
-        return toScale;
+        return scaled;
     }
 
-    List<float> Project(List<float> fourDpoint)
+    List<float> Projected(List<float> fourDpoint)
     {
-        //float pDotDub = DotProduct(fourDpoint, wHat);
-        //List<float> projected = VectorSubtract(fourDpoint, VectorScale(pDotDub, wHat));
-        //float scaleDown = 1/(1 - pDotDub);
-        //projected = VectorScale(scaleDown, projected);
+        float pDotDub = DotProduct(fourDpoint, wHat);
+        List<float> projected = VectorsSubtracted(fourDpoint, VectorScaled(pDotDub, wHat));
+        float scaleDown = 1 / (1 - pDotDub);
+        projected = VectorScaled(scaleDown, projected);
 
-        //projected.RemoveAt(3);
+        projected.RemoveAt(3);
 
-        //return projected;
+        return projected;
 
         //temp just drop 4th dimension
-        List<float> projected = new List<float>(fourDpoint);
-        projected.RemoveAt(3);
-        return projected;
+        //List<float> projected = new List<float>(fourDpoint);
+        //projected.RemoveAt(3);
+        //return projected;
     }
 
-    float PointRadius(List<float> fourDpoint)
+    float ProjectedR(List<float> fourDpoint)
     {
         //g is point minus eye
-        List<float> g = VectorSubtract(fourDpoint, eye);
+        List<float> g = VectorsSubtracted(fourDpoint, eye);
         //q is a 4d sphere radial vector that is perpendicular to point
-        List<float> q = VectorSubtract(VectorScale(DotProduct(g, g), fourDpoint), VectorScale(DotProduct(fourDpoint, g), g));
+        List<float> q = VectorsSubtracted(VectorScaled(DotProduct(g, g), fourDpoint), VectorScaled(DotProduct(fourDpoint, g), g));
 
         //Projected Radius Vector = R
 
-        List<float> R = VectorSubtract(Project(VectorAdd(fourDpoint, q)), Project(fourDpoint));
+        List<float> R = VectorsSubtracted(Projected(VectorsSummed(fourDpoint, q)), Projected(fourDpoint));
 
-        return (float)Math.Sqrt((double)DotProduct(R, R) / (double)DotProduct(q, q));
+        return fourDR * (float)Math.Sqrt((double)DotProduct(R, R) / (double)DotProduct(q, q));
     }
 
     // Start is called before the first frame update
@@ -143,10 +144,10 @@ public class FourDim : MonoBehaviour
                         List<float> ball = new List<float>() { i, j, k, l};
 
                         balls.Add(ball);
-                        List<float> projected = Project(ball);
-                        //float radius = fourDR * PointRadius(ball);
+                        List<float> projected = Projected(ball);
+                        float radius = ProjectedR(ball);
 
-                        //sphere.transform.localScale = new Vector3(radius, radius, radius);
+                        sphere.transform.localScale = new Vector3(radius, radius, radius);
                         ballList.Add(Instantiate(sphere, new Vector3(projected[0], projected[1], projected[2]), Quaternion.identity));
 
                     }
@@ -181,8 +182,10 @@ public class FourDim : MonoBehaviour
                 balls[i][3] += factor * DotProduct(wUpdate, balls[i]);
 
             }
-            List<float> projected = Project(balls[i]);
+            List<float> projected = Projected(balls[i]);
             ballList[i].transform.position = new Vector3(projected[0], projected[1], projected[2]);
+            float radius = ProjectedR(balls[i]);
+            ballList[i].transform.localScale = new Vector3(radius, radius, radius);
 
 
 
